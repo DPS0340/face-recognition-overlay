@@ -10,15 +10,16 @@ class Overlay(QtWidgets.QWidget):
         self.grid = QtWidgets.QGridLayout()
         self.rects = []
         # self.setGeometry(100, 100, 100, 100)
-        self.showMaximized()
-        # self.setStyleSheet("background-color: transparent;")
-        # self.setAttribute(Qt.WA_NoSystemBackground)
-        # self.setAttribute(Qt.WA_TransparentForMouseEvents)
+        self.setStyleSheet("background-color: transparent;")
+        # self.setStyleSheet("background-color: yellow;")
+        self.setAttribute(Qt.WA_NoSystemBackground)
+        self.setAttribute(Qt.WA_TransparentForMouseEvents)
         self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
-        # self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
-        # self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
-        # self.setWindowFlags(QtCore.Qt.CustomizeWindowHint)
-        # self.setWindowFlags(QtCore.Qt.Window)
+        self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
+        self.setWindowFlags(QtCore.Qt.FramelessWindowHint |
+                            QtCore.Qt.CustomizeWindowHint)
+        self.setWindowFlags(QtCore.Qt.Window)
+        self.showMaximized()
         # self.editor = QtWidgets.QTextEdit()
         # self.editor.setPlainText("OVERLAY" * 100)
         # self.grid.addWidget(self.editor)
@@ -37,32 +38,33 @@ class Overlay(QtWidgets.QWidget):
         self.rects.clear()
 
     def paintEvent(self, QPaintEvent):
-        self.sizeObject = QtWidgets.QDesktopWidget().screenGeometry()
-        painter = QtGui.QPainter(self)
-        painter.eraseRect(0, 0, self.sizeObject.width(),
-                          self.sizeObject.height())
-        QColor = QtGui.QColor(0, 255, 0, 255)
-        face_locations, face_names = get_faces()
-        painter.setRenderHint(QtGui.QPainter.Antialiasing)
-        painter.setPen(QtGui.QPen(QtGui.QBrush(QColor), 2))
-        painter.setBrush(QColor)
-        # painter.begin(self)
-        # self.rects += list(zip(face_locations, face_names))
-        for (top, right, bottom, left), name in zip(face_locations, face_names):
-            painter.drawLine(top, left, top, right)
-            painter.drawLine(bottom, left, bottom, right)
-            painter.drawLine(top, left, bottom, left)
-            painter.drawLine(top, right, bottom, right)
-            # painter.drawRect(left - 20, top - 20,
-            #                  right + 20, bottom + 20)
-            # painter.fillRect(left - 20, bottom - 15,
-            #                  right + 20, bottom + 20)
-            painter.drawText(left - 20, bottom + 15,
-                             name)
-        painter.end()
-        # painter.drawPath(path)
-        # painter.drawRect(0, 0, self.rect().width()-1, self.rect().height()-1)
-        self.update()
+        pass
+        # self.sizeObject = QtWidgets.QDesktopWidget().screenGeometry()
+        # painter = QtGui.QPainter(self)
+        # painter.eraseRect(0, 0, self.sizeObject.width(),
+        #                   self.sizeObject.height())
+        # QColor = QtGui.QColor(0, 255, 0, 255)
+        # face_locations, face_names = get_faces()
+        # painter.setRenderHint(QtGui.QPainter.Antialiasing)
+        # painter.setPen(QtGui.QPen(QtGui.QBrush(QColor), 2))
+        # painter.setBrush(QColor)
+        # # painter.begin(self)
+        # # self.rects += list(zip(face_locations, face_names))
+        # for (top, right, bottom, left), name in zip(face_locations, face_names):
+        #     painter.drawLine(top, left, top, right)
+        #     painter.drawLine(bottom, left, bottom, right)
+        #     painter.drawLine(top, left, bottom, left)
+        #     painter.drawLine(top, right, bottom, right)
+        #     # painter.drawRect(left - 20, top - 20,
+        #     #                  right + 20, bottom + 20)
+        #     # painter.fillRect(left - 20, bottom - 15,
+        #     #                  right + 20, bottom + 20)
+        #     painter.drawText(left - 20, bottom + 15,
+        #                      name)
+        # painter.end()
+        # # painter.drawPath(path)
+        # # painter.drawRect(0, 0, self.rect().width()-1, self.rect().height()-1)
+        # self.update()
 
 
 class Renderer(QtCore.QThread):
