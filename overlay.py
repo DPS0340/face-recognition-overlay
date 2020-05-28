@@ -14,16 +14,16 @@ class Overlay(QtWidgets.QWidget):
         self.setStyleSheet("background-color: transparent;")
         self.setAttribute(Qt.WA_NoSystemBackground)
         self.setAttribute(Qt.WA_TransparentForMouseEvents)
+        self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
         self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
         self.setWindowFlags(QtCore.Qt.FramelessWindowHint)
-        self.setWindowFlags(QtCore.Qt.Window)
         self.setWindowFlags(QtCore.Qt.CustomizeWindowHint)
-        self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
+        self.setWindowFlags(QtCore.Qt.Window)
         # self.editor = QtWidgets.QTextEdit()
         # self.editor.setPlainText("OVERLAY" * 100)
         # self.grid.addWidget(self.editor)
         self.setLayout(self.grid)
-        self.renderer = Renderer(overlay=self)
+        self.renderer = Renderer(painter=QtGui.QPainter(self), overlay=self)
         self.renderer.start()
         self.show()
 
@@ -38,8 +38,9 @@ class Overlay(QtWidgets.QWidget):
 
 
 class Renderer(QtCore.QThread):
-    def __init__(self, overlay=None):
+    def __init__(self, painter=None, overlay=None):
         QtCore.QThread.__init__(self)
+        self.painter = painter
         self.overlay = overlay
         self._status = True
 
@@ -49,8 +50,9 @@ class Renderer(QtCore.QThread):
     def run(self):
         while True:
             # self.removeRectangles()
-            painter = QtGui.QPainter(self.overlay)
             self.sizeObject = QtWidgets.QDesktopWidget().screenGeometry()
+            painter = self.painter
+            painter.begin(self.overlay)
             painter.eraseRect(0, 0, self.sizeObject.width(),
                               self.sizeObject.height())
             QColor = QtGui.QColor(0, 255, 0, 255)
@@ -71,6 +73,7 @@ class Renderer(QtCore.QThread):
                 #                  right + 20, bottom + 20)
                 painter.drawText(left - 20, bottom + 15,
                                  name)
+            painter.end()
             # painter.drawPath(path)
             # painter.drawRect(0, 0, self.rect().width()-1, self.rect().height()-1)
             self.overlay.update()
