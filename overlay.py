@@ -25,8 +25,6 @@ _height = GetSystemMetrics(1)
 w = tkinter.Canvas(root, width=_width, height=_height)
 w.config(bg='black')
 w.pack()
-# canvas = tkinter.Canvas(root)
-# canvas.pack()
 
 
 hWindow = pywintypes.HANDLE(int(root.frame(), 16))
@@ -52,18 +50,10 @@ def refresh():
                       10, text=name, fill='green', font=("맑은 고딕", 18))
 
         w.update()
-        # root.update_idletasks()
-        # root.update()
-        # canvas.create_rectangle(top, left, top, right, fill='green')
-    #     canvas.create_text(left - 20, bottom + 15,
-    #                        name)
-    # canvas.update()
 
     root.after(150, refresh)
 
 
+# refresh 할당
 root.after(150, refresh)
-# w.create_rectangle(
-#     0, 0, 200, 200, fill='green')
-# w.update()
 root.mainloop()
