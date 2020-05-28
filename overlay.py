@@ -1,120 +1,69 @@
-from PyQt5 import QtCore, QtGui, QtWidgets
-from PyQt5.QtCore import Qt
-from time import sleep
+import tkinter
+import win32api
+import win32con
+import pywintypes
 from main import get_faces
+from time import sleep
+from win32api import GetSystemMetrics
+import ctypes
+
+# 이 파일을 실행하세요
+
+# hidpi 관련 설정
+ctypes.windll.shcore.SetProcessDpiAwareness(2)
+root = tkinter.Tk()
+root.lift()
+root.attributes("-fullscreen", True)
+root.wm_attributes("-topmost", True)
+root.wm_attributes("-disabled", True)
+root.wm_attributes("-transparentcolor", "black")
+root.overrideredirect(True)
+dpi = ctypes.windll.user32.GetDpiForWindow(root.winfo_id())
+print(dpi)
+_width = GetSystemMetrics(0)
+_height = GetSystemMetrics(1)
+w = tkinter.Canvas(root, width=_width, height=_height)
+w.config(bg='black')
+w.pack()
+# canvas = tkinter.Canvas(root)
+# canvas.pack()
 
 
-class Overlay(QtWidgets.QWidget):
-    def __init__(self, steps=5, *args, **kwargs):
-        super(QtWidgets.QWidget, self).__init__()
-        self.grid = QtWidgets.QGridLayout()
-        self.rects = []
-        # self.setGeometry(100, 100, 100, 100)
-        self.setStyleSheet("background-color: transparent;")
-        # self.setStyleSheet("background-color: yellow;")
-        self.setAttribute(Qt.WA_NoSystemBackground)
-        self.setAttribute(Qt.WA_TransparentForMouseEvents)
-        self.setAttribute(QtCore.Qt.WA_TranslucentBackground)
-        self.setWindowFlags(QtCore.Qt.WindowStaysOnTopHint)
-        self.setWindowFlags(QtCore.Qt.FramelessWindowHint |
-                            QtCore.Qt.CustomizeWindowHint)
-        self.setWindowFlags(QtCore.Qt.Window)
-        self.showMaximized()
-        # self.editor = QtWidgets.QTextEdit()
-        # self.editor.setPlainText("OVERLAY" * 100)
-        # self.grid.addWidget(self.editor)
-        self.setLayout(self.grid)
-        # self.renderer = Renderer(painter=QtGui.QPainter(self), overlay=self)
-        # self.renderer.start()
-        self.show()
+hWindow = pywintypes.HANDLE(int(root.frame(), 16))
+# http://msdn.microsoft.com/en-us/library/windows/desktop/ff700543(v=vs.85).aspx
+# The WS_EX_TRANSPARENT flag makes events (like mouse clicks) fall through the window.
 
-    def removeRectangles(self):
-        painter = QtGui.QPainter(self)
-        painter.begin()
-        for xy, name in self.rects:
-            self.painter.eraseRect(xy)
-        painter.end()
-        self.update()
-        self.rects.clear()
-
-    def paintEvent(self, QPaintEvent):
-        pass
-        # self.sizeObject = QtWidgets.QDesktopWidget().screenGeometry()
-        # painter = QtGui.QPainter(self)
-        # painter.eraseRect(0, 0, self.sizeObject.width(),
-        #                   self.sizeObject.height())
-        # QColor = QtGui.QColor(0, 255, 0, 255)
-        # face_locations, face_names = get_faces()
-        # painter.setRenderHint(QtGui.QPainter.Antialiasing)
-        # painter.setPen(QtGui.QPen(QtGui.QBrush(QColor), 2))
-        # painter.setBrush(QColor)
-        # # painter.begin(self)
-        # # self.rects += list(zip(face_locations, face_names))
-        # for (top, right, bottom, left), name in zip(face_locations, face_names):
-        #     painter.drawLine(top, left, top, right)
-        #     painter.drawLine(bottom, left, bottom, right)
-        #     painter.drawLine(top, left, bottom, left)
-        #     painter.drawLine(top, right, bottom, right)
-        #     # painter.drawRect(left - 20, top - 20,
-        #     #                  right + 20, bottom + 20)
-        #     # painter.fillRect(left - 20, bottom - 15,
-        #     #                  right + 20, bottom + 20)
-        #     painter.drawText(left - 20, bottom + 15,
-        #                      name)
-        # painter.end()
-        # # painter.drawPath(path)
-        # # painter.drawRect(0, 0, self.rect().width()-1, self.rect().height()-1)
-        # self.update()
+# WS_EX_COMPOSITED 붙이면 프로그램이 동작하지 않음
+# exStyle = win32con.WS_EX_COMPOSITED | win32con.WS_EX_LAYERED | win32con.WS_EX_NOACTIVATE | win32con.WS_EX_TOPMOST | win32con.WS_EX_TRANSPARENT
+exStyle = win32con.WS_EX_LAYERED | win32con.WS_EX_NOACTIVATE | win32con.WS_EX_TOPMOST | win32con.WS_EX_TRANSPARENT
+win32api.SetWindowLong(hWindow, win32con.GWL_EXSTYLE, exStyle)
 
 
-class Renderer(QtCore.QThread):
-    def __init__(self, painter=None, overlay=None):
-        QtCore.QThread.__init__(self)
-        self.painter = painter
-        self.overlay = overlay
-        self._status = True
+def refresh():
+    w.delete('all')
+    print("refreshing...")
+    face_locations, face_names = get_faces()
+    for (top, right, bottom, left), name in zip(face_locations, face_names):
+        w.create_line(left, bottom, right, bottom, fill='green', width=2)
+        w.create_line(left, top, right, top, fill='green', width=2)
+        w.create_line(left, bottom, left, top, fill='green', width=2)
+        w.create_line(right, bottom, right, top, fill='green', width=2)
+        w.create_text((left + right) / 2 + 5, bottom +
+                      10, text=name, fill='green', font=("맑은 고딕", 18))
 
-    def __del__(self):
-        self.wait()
+        w.update()
+        # root.update_idletasks()
+        # root.update()
+        # canvas.create_rectangle(top, left, top, right, fill='green')
+    #     canvas.create_text(left - 20, bottom + 15,
+    #                        name)
+    # canvas.update()
 
-    def run(self):
-        while True:
-            # self.removeRectangles()
-            self.sizeObject = QtWidgets.QDesktopWidget().screenGeometry()
-            painter = self.painter
-            painter.begin(self.overlay)
-            painter.eraseRect(0, 0, self.sizeObject.width(),
-                              self.sizeObject.height())
-            QColor = QtGui.QColor(0, 255, 0, 255)
-            face_locations, face_names = get_faces()
-            painter.setRenderHint(QtGui.QPainter.Antialiasing)
-            painter.setPen(QtGui.QPen(QtGui.QBrush(QColor), 2))
-            painter.setBrush(QColor)
-            # painter.begin(self)
-            # self.rects += list(zip(face_locations, face_names))
-            for (top, right, bottom, left), name in zip(face_locations, face_names):
-                painter.drawLine(top, left, top, right)
-                painter.drawLine(bottom, left, bottom, right)
-                painter.drawLine(top, left, bottom, left)
-                painter.drawLine(top, right, bottom, right)
-                # painter.drawRect(left - 20, top - 20,
-                #                  right + 20, bottom + 20)
-                # painter.fillRect(left - 20, bottom - 15,
-                #                  right + 20, bottom + 20)
-                painter.drawText(left - 20, bottom + 15,
-                                 name)
-            painter.end()
-            # painter.drawPath(path)
-            # painter.drawRect(0, 0, self.rect().width()-1, self.rect().height()-1)
-            self.overlay.update()
-            # self.rects.append()
+    root.after(150, refresh)
 
 
-def main():
-    app = QtWidgets.QApplication([])
-    overlay = Overlay()
-    app.exec_()
-
-
-if __name__ == "__main__":
-    main()
+root.after(150, refresh)
+# w.create_rectangle(
+#     0, 0, 200, 200, fill='green')
+# w.update()
+root.mainloop()
