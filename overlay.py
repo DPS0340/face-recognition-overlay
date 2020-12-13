@@ -28,6 +28,20 @@ def find_faces(image):
 def show_face(image):
     for pos in face_locations:
         image = process_face(image, pos)
+    if len(face_locations):
+        image = print_welcome(image)
+    return image
+
+def print_welcome(image):
+    org = (300, 300)
+    text = "Welcome Home!"
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    fontScale = 1
+    aa = cv2.LINE_AA
+    thickness = 2
+    color = (0, 255, 0)
+    image = cv2.putText(image, text, org, font, fontScale,
+                        color, thickness, aa, False)
     return image
 
 def process_face(image, pos):
@@ -48,10 +62,9 @@ if __name__ == '__main__':
         cnt += 1
         ret, img = cap.read()
         if ret:
-            if cnt >= 50:
-                t = Thread(target=find_faces, args=(img))
+            if cnt >= 5:
+                t = Thread(target=find_faces, args=(img,))
                 t.start()
-                face_wrap(img)
                 cnt = 0
             img = show_face(img)
             cv2.imshow("RPI 얼굴인식", img)
