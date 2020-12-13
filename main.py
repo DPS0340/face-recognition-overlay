@@ -2,15 +2,7 @@ import face_recognition as fr
 import os
 import cv2
 import numpy as np
-from PIL import ImageGrab
 from time import sleep
-
-
-def a():
-    img = ImageGrab.grab()
-    saveas = 'test.jpg'
-    img.save(saveas)
-    img = cv2.imread('test.jpg', cv2.IMREAD_COLOR)
 
 
 def get_encoded_faces():
@@ -96,15 +88,13 @@ def classify_face(im):
             return face_names
 
 
-def get_faces():
+def get_faces(frame):
     faces = get_encoded_faces()
     faces_encoded = list(faces.values())
     known_face_names = list(faces.keys())
 
-    img = np.array(ImageGrab.grab())
-    # img = cv2.imread(im, 1)
-    # img = cv2.resize(img, (0, 0), fx=0.5, fy=0.5)
-    # img = img[:,:,::-1]
+    img = frame
+    print(type(img))
 
     face_locations = fr.face_locations(img)
     unknown_face_encodings = fr.face_encodings(
